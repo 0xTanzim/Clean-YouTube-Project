@@ -32,7 +32,7 @@
 
 #### 🎮 **Playback Features**
 
-- [ ] **Video Bookmarks**
+- [x] **Video Bookmarks**
 
   - Save specific timestamps in videos
   - Add personal notes to bookmarks

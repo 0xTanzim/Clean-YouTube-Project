@@ -60,6 +60,23 @@ export interface VideoProgress {
   totalVideos: number;
 }
 
+// Video bookmark types
+export interface VideoBookmark {
+  id: string;
+  videoId: string;
+  playlistId: string;
+  timestamp: number; // in seconds
+  title: string;
+  note?: string;
+  createdAt: number;
+  updatedAt: number;
+  tags?: string[];
+}
+
+export interface BookmarkCollection {
+  [videoId: string]: VideoBookmark[];
+}
+
 // Store state types
 export interface PlaylistState {
   data: Record<string, Playlist>;
@@ -77,6 +94,10 @@ export interface RecentState {
 
 export interface NoteState {
   items: Record<string, string>;
+}
+
+export interface BookmarkState {
+  items: BookmarkCollection;
 }
 
 export interface VideoProgressState {

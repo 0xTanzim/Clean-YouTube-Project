@@ -1,7 +1,11 @@
 // PlayerPage.tsx - Clean, Distraction-Free Study Experience
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import YouTube from 'react-youtube';
+import BookmarkForm from '../components/bookmarks/BookmarkForm';
+import BookmarkManager from '../components/bookmarks/BookmarkManager';
+import VideoBookmarkTimeline from '../components/bookmarks/VideoBookmarkTimeline';
+import { useBookmarks } from '../hooks/useBookmarks';
 import { useStoreActions } from '../hooks/useStore';
 import type { VideoProgress } from '../types';
 
@@ -16,6 +20,17 @@ const PlayerPage = () => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [watchTime, setWatchTime] = useState(0);
   const [videoStartTime, setVideoStartTime] = useState(0);
+
+  // Bookmark state
+  const [showBookmarkForm, setShowBookmarkForm] = useState(false);
+  const [showBookmarkManager, setShowBookmarkManager] = useState(false);
+  const [currentVideoTime, setCurrentVideoTime] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const youtubePlayerRef = useRef<any>(null);
+
+  // Initialize bookmarks hook
+  const { videoBookmarks, playlistBookmarks, exportAsMarkdown, stats } =
+    useBookmarks(selectedVideo || undefined, playlistId);
 
   // Load progress from localStorage
   const loadProgress = useCallback(() => {
@@ -131,6 +146,69 @@ const PlayerPage = () => {
     saveProgress(index, videoId, watchTime);
   };
 
+  // Bookmark handlers
+  const handleCreateBookmark = () => {
+    if (!youtubePlayerRef.current) return;
+
+    const currentTime = youtubePlayerRef.current.getCurrentTime();
+    setCurrentVideoTime(currentTime);
+    setShowBookmarkForm(true);
+  };
+
+  const handleSaveBookmark = () => {
+    setShowBookmarkForm(false);
+    // Bookmark is automatically saved via the form component
+  };
+
+  const handleCancelBookmark = () => {
+    setShowBookmarkForm(false);
+  };
+
+  const handleJumpToTime = (timestamp: number) => {
+    if (youtubePlayerRef.current) {
+      youtubePlayerRef.current.seekTo(timestamp, true);
+      youtubePlayerRef.current.playVideo();
+    }
+    setShowBookmarkManager(false);
+  };
+
+  const handleExportBookmarks = () => {
+    try {
+      exportAsMarkdown();
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const onYouTubeReady = (event: any) => {
+    youtubePlayerRef.current = event.target;
+    setVideoDuration(event.target.getDuration());
+  };
+
+  const onYouTubeStateChange = (event: any) => {
+    // Update current time when video is playing
+    if (event.data === 1) {
+      // Playing
+      const updateTime = () => {
+        if (youtubePlayerRef.current) {
+          setCurrentVideoTime(youtubePlayerRef.current.getCurrentTime());
+          setVideoDuration(youtubePlayerRef.current.getDuration());
+        }
+      };
+
+      const interval = setInterval(() => {
+        if (
+          youtubePlayerRef.current &&
+          youtubePlayerRef.current.getPlayerState() === 1
+        ) {
+          updateTime();
+        } else {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
+  };
+
   // Navigation functions
   const goToNextVideo = () => {
     if (
@@ -154,7 +232,11 @@ const PlayerPage = () => {
   // Keyboard navigation for better study experience
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLInputElement) return; // Don't trigger if typing in input
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      )
+        return; // Don't trigger if typing in input
 
       switch (event.key) {
         case 'ArrowLeft':
@@ -170,9 +252,28 @@ const PlayerPage = () => {
           event.preventDefault();
           setShowPlaylist(!showPlaylist);
           break;
+        case 'b':
+        case 'B':
+          event.preventDefault();
+          handleCreateBookmark();
+          break;
+        case 'm':
+        case 'M':
+          event.preventDefault();
+          setShowBookmarkManager(!showBookmarkManager);
+          break;
+        case 'e':
+        case 'E':
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            handleExportBookmarks();
+          }
+          break;
         case 'Escape':
           event.preventDefault();
           setShowPlaylist(false);
+          setShowBookmarkManager(false);
+          setShowBookmarkForm(false);
           break;
       }
     };
@@ -254,6 +355,8 @@ const PlayerPage = () => {
                   start: 0,
                 },
               }}
+              onReady={onYouTubeReady}
+              onStateChange={onYouTubeStateChange}
               className="w-full"
               onEnd={goToNextVideo}
             />
@@ -262,92 +365,181 @@ const PlayerPage = () => {
 
         {/* Minimal Video Info Bar */}
         <div className="bg-gray-900 text-white p-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-semibold truncate">
-                {currentVideo?.title || 'Loading...'}
-              </h1>
-              <div className="flex items-center space-x-4 mt-1">
-                <p className="text-sm text-gray-400">
-                  {currentVideo?.channelTitle} • Video {currentVideoIndex + 1}{' '}
-                  of {playlistData?.playlistItems?.length || 0}
-                </p>
-                <div className="text-xs text-blue-400">
-                  {getProgressPercentage()}% Complete •{' '}
-                  {formatWatchTime(watchTime)} watched
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg font-semibold truncate">
+                  {currentVideo?.title || 'Loading...'}
+                </h1>
+                <div className="flex items-center space-x-4 mt-1">
+                  <p className="text-sm text-gray-400">
+                    {currentVideo?.channelTitle} • Video {currentVideoIndex + 1}{' '}
+                    of {playlistData?.playlistItems?.length || 0}
+                  </p>
+                  <div className="text-xs text-blue-400">
+                    {getProgressPercentage()}% Complete •{' '}
+                    {formatWatchTime(watchTime)} watched
+                  </div>
                 </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Shortcuts: ← Previous | → Next | P Playlist | B Bookmark | M
+                  Manager | Ctrl+E Export | Esc Close
+                </p>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Shortcuts: ← Previous | → Next | P Playlist | Esc Close
-              </p>
-            </div>
 
-            {/* Navigation Controls */}
-            <div className="flex items-center space-x-4 ml-4">
-              <button
-                onClick={goToPreviousVideo}
-                disabled={currentVideoIndex === 0}
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Previous Video"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
+              {/* Navigation Controls */}
+              <div className="flex items-center space-x-4 ml-4">
+                {/* Bookmark Controls */}
+                <div className="flex items-center space-x-2 border-r border-gray-700 pr-4">
+                  <button
+                    onClick={handleCreateBookmark}
+                    disabled={!selectedVideo}
+                    className="p-2 rounded-lg bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    title="Add Bookmark (B)"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                      />
+                    </svg>
+                  </button>
 
-              <button
-                onClick={goToNextVideo}
-                disabled={
-                  !playlistData?.playlistItems ||
-                  currentVideoIndex >= playlistData.playlistItems.length - 1
-                }
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title="Next Video"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
+                  <button
+                    onClick={() => setShowBookmarkManager(!showBookmarkManager)}
+                    className={`p-2 rounded-lg transition-colors relative ${
+                      showBookmarkManager
+                        ? 'bg-yellow-600 hover:bg-yellow-700'
+                        : 'bg-gray-800 hover:bg-gray-700'
+                    }`}
+                    title="Bookmark Manager (M)"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                      />
+                    </svg>
+                    {videoBookmarks.length > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {videoBookmarks.length}
+                      </span>
+                    )}
+                  </button>
 
-              <button
-                onClick={() => setShowPlaylist(!showPlaylist)}
-                className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors"
-                title="Toggle Playlist"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                  {playlistBookmarks.length > 0 && (
+                    <button
+                      onClick={handleExportBookmarks}
+                      className="p-2 rounded-lg bg-green-600 hover:bg-green-700 transition-colors"
+                      title="Export Bookmarks (Ctrl+E)"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={goToPreviousVideo}
+                  disabled={currentVideoIndex === 0}
+                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Previous Video"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={goToNextVideo}
+                  disabled={
+                    !playlistData?.playlistItems ||
+                    currentVideoIndex >= playlistData.playlistItems.length - 1
+                  }
+                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Next Video"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={() => setShowPlaylist(!showPlaylist)}
+                  className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors"
+                  title="Toggle Playlist"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Video Bookmark Timeline */}
+              {videoBookmarks.length > 0 && videoDuration > 0 && (
+                <div className="mt-4">
+                  <VideoBookmarkTimeline
+                    bookmarks={videoBookmarks}
+                    videoDuration={videoDuration}
+                    currentTime={currentVideoTime}
+                    onJumpToTime={handleJumpToTime}
                   />
-                </svg>
-              </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -467,6 +659,85 @@ const PlayerPage = () => {
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setShowPlaylist(false)}
+        />
+      )}
+
+      {/* Bookmark Manager Sidebar */}
+      {showBookmarkManager && (
+        <div className="fixed right-0 top-0 h-full w-96 bg-white dark:bg-gray-900 shadow-2xl z-50 border-l border-gray-200 dark:border-gray-700">
+          <div className="h-full flex flex-col">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Video Bookmarks
+              </h2>
+              <button
+                onClick={() => setShowBookmarkManager(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-hidden">
+              <BookmarkManager
+                bookmarks={videoBookmarks}
+                onJumpToTime={handleJumpToTime}
+                onExportMarkdown={handleExportBookmarks}
+                className="h-full p-4"
+              />
+            </div>
+
+            {/* Stats footer */}
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <p>
+                  📊 <strong>{stats.totalBookmarks}</strong> bookmarks in this
+                  video
+                </p>
+                <p>
+                  📚 <strong>{stats.totalPlaylistBookmarks}</strong> total in
+                  playlist
+                </p>
+                {stats.uniqueTags.length > 0 && (
+                  <p>
+                    🏷️ <strong>{stats.uniqueTags.length}</strong> unique tags
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bookmark Manager Overlay */}
+      {showBookmarkManager && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setShowBookmarkManager(false)}
+        />
+      )}
+
+      {/* Bookmark Form Modal */}
+      {showBookmarkForm && selectedVideo && currentVideo && (
+        <BookmarkForm
+          videoId={selectedVideo}
+          playlistId={playlistId || ''}
+          currentTime={currentVideoTime}
+          videoTitle={currentVideo.title}
+          onSave={handleSaveBookmark}
+          onCancel={handleCancelBookmark}
         />
       )}
     </div>

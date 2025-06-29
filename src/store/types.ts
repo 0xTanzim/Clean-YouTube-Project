@@ -1,10 +1,12 @@
 import type { Action, Thunk } from 'easy-peasy';
 import type {
+  BookmarkState,
   FavoriteState,
   NoteState,
   Playlist,
   PlaylistState,
   RecentState,
+  VideoBookmark,
   VideoProgress,
   VideoProgressState,
 } from '../types';
@@ -42,6 +44,17 @@ export interface VideoProgressModel extends VideoProgressState {
   deleteVideoProgressForPlaylist: Action<VideoProgressModel, string>;
 }
 
+export interface BookmarkModel extends BookmarkState {
+  addBookmark: Action<BookmarkModel, VideoBookmark>;
+  updateBookmark: Action<
+    BookmarkModel,
+    { bookmarkId: string; updates: Partial<VideoBookmark> }
+  >;
+  deleteBookmark: Action<BookmarkModel, string>;
+  deleteBookmarksForVideo: Action<BookmarkModel, string>;
+  deleteBookmarksForPlaylist: Action<BookmarkModel, string>;
+}
+
 // Root store model
 export interface StoreModel {
   playlists: PlaylistModel;
@@ -49,4 +62,5 @@ export interface StoreModel {
   recentPlaylists: RecentModel;
   notes: NoteModel;
   videoProgress: VideoProgressModel;
+  bookmarks: BookmarkModel;
 }

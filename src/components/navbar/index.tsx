@@ -17,7 +17,13 @@ const Navbar = () => {
                 Free of ads, comments, and other distractions.
               </p>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center space-x-4">
+              <RouterLink
+                to="/bookmark-demo"
+                className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors no-underline"
+              >
+                🔖 Bookmark Demo
+              </RouterLink>
               <DarkModeToggle variant="header" />
             </div>
           </div>

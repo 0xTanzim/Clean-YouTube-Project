@@ -1,10 +1,10 @@
-import PlayListCard from '../components/playlist-card-itms';
+import PlayListCard from '@/components/playlist-card-itms';
 import {
   EmptyState,
   ErrorMessage,
   LoadingSpinner,
-} from '../components/ui/Feedback';
-import { usePlaylists } from '../hooks/usePlaylists';
+} from '@/components/ui/Feedback';
+import { usePlaylists } from '@/hooks/usePlaylists';
 
 const HomePage = () => {
   const { playlists, isLoading, error } = usePlaylists();

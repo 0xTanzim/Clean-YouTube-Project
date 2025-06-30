@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { bookmarkUtils } from '../lib/utils';
+import { bookmarkUtils } from '@/lib/utils';
 import type { VideoBookmark } from '../types';
 import { useStoreActions, useStoreState } from './useStore';
 

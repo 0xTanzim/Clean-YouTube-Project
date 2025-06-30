@@ -1,6 +1,6 @@
+import { useBookmarks } from '@/hooks/useBookmarks';
+import { bookmarkUtils } from '@/lib/utils';
 import React, { useState } from 'react';
-import { useBookmarks } from '../../hooks/useBookmarks';
-import { bookmarkUtils } from '../../lib/utils';
 
 interface BookmarkFormProps {
   videoId: string;

@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useFavorites } from '../../hooks/useFavorites';
-import { usePlaylists } from '../../hooks/usePlaylists';
-import type { Playlist } from '../../types';
-import PlayListCard from '../playlist-card-itms';
 import { EmptyState, LoadingSpinner } from '../ui/Feedback';
+import { useFavorites } from '@/hooks/useFavorites';
+import { usePlaylists } from '@/hooks/usePlaylists';
+import type { Playlist } from '@/types';
+import { useEffect, useState } from 'react';
+import PlayListCard from '../playlist-card-itms';
 
 const FavoritePlaylists = () => {
   const { favoriteIds } = useFavorites();

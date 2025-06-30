@@ -1,6 +1,6 @@
+import { videoProgressUtils } from '@/lib/utils';
+import type { VideoProgress } from '@/types';
 import { useCallback, useEffect, useState } from 'react';
-import { videoProgressUtils } from '../lib/utils';
-import type { VideoProgress } from '../types';
 
 /**
  * Hook for managing video progress tracking

@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
 
+import DarkModeToggle from '@/components/DarkModeToggle';
 import AddIcon from '@mui/icons-material/Add';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ReorderIcon from '@mui/icons-material/Reorder';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import { useState } from 'react';
-import DarkModeToggle from '../../components/DarkModeToggle';
-import PlayListForm from '../../components/playlist form';
-import { useStoreActions } from '../../hooks/useStore';
+
+import PlayListForm from '@/components/playlist form';
+
+import { useStoreActions } from '@/hooks/useStore';
 
 interface SideNavProps {
   handleMenuBarTrig: () => void;

@@ -1,6 +1,6 @@
 import { action, persist, thunk } from 'easy-peasy';
 import type { PlaylistModel } from '../types';
-import getPlaylist from './../../api';
+import getPlaylist from '@/api';
 
 const playlistModel: PlaylistModel = persist(
   {

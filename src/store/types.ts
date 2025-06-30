@@ -9,7 +9,7 @@ import type {
   VideoBookmark,
   VideoProgress,
   VideoProgressState,
-} from '../types';
+} from '@/types';
 
 // Store model interfaces
 export interface PlaylistModel extends PlaylistState {

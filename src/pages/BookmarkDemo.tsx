@@ -1,8 +1,8 @@
+import BookmarkManager from '@/components/bookmarks/BookmarkManager';
+import VideoBookmarkTimeline from '@/components/bookmarks/VideoBookmarkTimeline';
+import { bookmarkUtils } from '@/lib/utils';
+import type { VideoBookmark } from '@/types';
 import React, { useState } from 'react';
-import BookmarkManager from '../components/bookmarks/BookmarkManager';
-import VideoBookmarkTimeline from '../components/bookmarks/VideoBookmarkTimeline';
-import { bookmarkUtils } from '../lib/utils';
-import type { VideoBookmark } from '../types';
 
 const BookmarkDemo: React.FC = () => {
   // Demo data

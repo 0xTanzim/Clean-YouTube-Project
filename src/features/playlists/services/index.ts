@@ -1,6 +1,6 @@
 // Playlist-specific business logic and API calls
-import getPlaylist from '../../../api';
-import type { Playlist } from '../../../types';
+import getPlaylist from '@/api';
+import type { Playlist } from '@/types';
 
 export class PlaylistService {
   /**

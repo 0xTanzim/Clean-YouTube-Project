@@ -1,10 +1,10 @@
 import { PlayArrow, Star, StarBorder } from '@mui/icons-material';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useFavorites } from '../../hooks/useFavorites';
-import { useRecent } from '../../hooks/useRecent';
-import { truncateText } from '../../lib/utils';
-import type { PlayListCardProps } from '../../types';
+import { useFavorites } from '@/hooks/useFavorites';
+import { useRecent } from '@/hooks/useRecent';
+import { truncateText } from '@/lib/utils';
+import type { PlayListCardProps } from '@/types';
 
 const PlayListCard = ({ playlist }: PlayListCardProps) => {
   const { playlistThumbnails, playlistTitle, channelTitle, playlistId } =

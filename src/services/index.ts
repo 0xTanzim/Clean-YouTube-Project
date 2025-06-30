@@ -1,7 +1,7 @@
 // Service layer pattern for API calls
-import getPlaylist from '../api';
-import { safeAsync } from '../lib/utils';
-import type { ApiResponse, Playlist } from '../types';
+import getPlaylist from '@/api';
+import { safeAsync } from '@/lib/utils';
+import type { ApiResponse, Playlist } from '@/types';
 
 export class PlaylistService {
   /**

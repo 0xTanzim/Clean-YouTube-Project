@@ -1,6 +1,6 @@
 import { useStoreActions, useStoreState } from 'easy-peasy';
 import { useCallback } from 'react';
-import type { Playlist } from '../types';
+import type { Playlist } from '@/types';
 
 /**
  * Hook for managing playlists

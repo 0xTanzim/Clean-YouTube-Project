@@ -1,5 +1,5 @@
 import { action, persist, type Action } from 'easy-peasy';
-import type { BookmarkCollection, VideoBookmark } from '../../types';
+import type { BookmarkCollection, VideoBookmark } from '@/types';
 
 interface BookmarkModel {
   bookmarks: BookmarkCollection;

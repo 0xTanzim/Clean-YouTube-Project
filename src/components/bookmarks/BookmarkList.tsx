@@ -1,6 +1,6 @@
+import { bookmarkUtils } from '@/lib/utils';
+import type { VideoBookmark } from '@/types';
 import React from 'react';
-import { bookmarkUtils } from '../../lib/utils';
-import type { VideoBookmark } from '../../types';
 
 interface BookmarkListProps {
   bookmarks: VideoBookmark[];

@@ -39,7 +39,7 @@
   - Quick jump to important moments
   - Export bookmarks as markdown
 
-- [ ] **Playback Speed Control**
+- [x] **Playback Speed Control**
 
   - 0.25x to 2x speed options
   - Keyboard shortcuts (Shift + < / >)

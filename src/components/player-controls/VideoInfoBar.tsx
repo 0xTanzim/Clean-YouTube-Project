@@ -1,5 +1,5 @@
+import type { VideoBookmark } from '@/types';
 import React from 'react';
-import type { VideoBookmark } from '../../types';
 import VideoBookmarkTimeline from '../bookmarks/VideoBookmarkTimeline';
 import PlaybackSpeedControl from './PlaybackSpeedControl';
 

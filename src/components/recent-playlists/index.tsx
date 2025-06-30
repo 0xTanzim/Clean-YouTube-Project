@@ -1,9 +1,9 @@
+import { EmptyState, LoadingSpinner } from '../ui/Feedback';
+import { usePlaylists } from '@/hooks/usePlaylists';
+import type { Playlist } from '@/types';
 import { useStoreState } from 'easy-peasy';
 import { useEffect, useState } from 'react';
-import { usePlaylists } from '../../hooks/usePlaylists';
-import type { Playlist } from '../../types';
 import PlayListCard from '../playlist-card-itms';
-import { EmptyState, LoadingSpinner } from '../ui/Feedback';
 
 const RecentPlaylists = () => {
   const recentPlaylistIds = useStoreState(

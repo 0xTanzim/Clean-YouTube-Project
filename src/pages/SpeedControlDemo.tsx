@@ -1,5 +1,5 @@
+import PlaybackSpeedControl from '@/components/player-controls/PlaybackSpeedControl';
 import React, { useState } from 'react';
-import PlaybackSpeedControl from '../components/player-controls/PlaybackSpeedControl';
 
 const SpeedControlDemo: React.FC = () => {
   const [currentSpeed, setCurrentSpeed] = useState(1);

@@ -1,5 +1,5 @@
-import { STORAGE_KEYS } from '../constants';
-import type { VideoBookmark, VideoProgress } from '../types';
+import { STORAGE_KEYS } from '@/constants';
+import type { VideoBookmark, VideoProgress } from '@/types';
 
 /**
  * Truncates text to specified length with ellipsis

@@ -1,10 +1,10 @@
-import PlayListCard from '../components/playlist-card-itms';
+import PlayListCard from '@/components/playlist-cards';
 import {
   EmptyState,
   ErrorMessage,
   LoadingSpinner,
-} from '../components/ui/Feedback';
-import { usePlaylists } from '../hooks/usePlaylists';
+} from '@/components/ui/Feedback';
+import { usePlaylists } from '@/hooks/usePlaylists';
 
 const HomePage = () => {
   const { playlists, isLoading, error } = usePlaylists();
@@ -59,7 +59,7 @@ const HomePage = () => {
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {playlists.map((playlist, index) => (
-          <div key={playlist.playlistId || index} className="flex">
+          <div key={playlist.id || index} className="flex">
             <PlayListCard playlist={playlist} />
           </div>
         ))}

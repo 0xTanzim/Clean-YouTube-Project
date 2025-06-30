@@ -9,6 +9,8 @@ export const STORAGE_KEYS = {
   FAVORITES: 'favorites',
   RECENT_PLAYLISTS: 'recent_playlists',
   NOTES: 'notes',
+  BOOKMARKS: 'video_bookmarks',
+  PLAYBACK_SPEED: 'playback_speed',
 } as const;
 
 // UI constants

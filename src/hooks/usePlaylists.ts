@@ -1,6 +1,6 @@
+import type { Playlist } from '@/types';
 import { useStoreActions, useStoreState } from 'easy-peasy';
 import { useCallback } from 'react';
-import type { Playlist } from '../types';
 
 /**
  * Hook for managing playlists
@@ -16,7 +16,7 @@ export const usePlaylists = () => {
     (actions: any) => actions.playlists.getPlaylistById
   );
 
-  const playlists = Object.values(playlistData) as Playlist[];
+  const playlists = playlistData ? Object.values(playlistData).filter(Boolean) as Playlist[] : [];
 
   const fetchPlaylist = useCallback(
     async (playlistId: string) => {

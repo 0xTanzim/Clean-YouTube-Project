@@ -1,6 +1,6 @@
+import getPlaylist from '@/api';
 import { action, persist, thunk } from 'easy-peasy';
 import type { PlaylistModel } from '../types';
-import getPlaylist from './../../api';
 
 const playlistModel: PlaylistModel = persist(
   {
@@ -16,8 +16,12 @@ const playlistModel: PlaylistModel = persist(
       state.error = payload;
     }),
 
-    addPlaylist: action((state, payload) => {
-      state.data[payload.playlistId] = payload;
+    clearError: action((state) => {
+      state.error = '';
+    }),
+
+    setPlaylist: action((state, payload) => {
+      state.data[payload.id] = payload;
     }),
 
     // Thunk to fetch playlist details by playlistId
@@ -25,9 +29,10 @@ const playlistModel: PlaylistModel = persist(
       if (helpers.getState().data[playlistId]) return;
 
       actions.setLoading(true);
+      actions.clearError();
       try {
         const playlistDetails = await getPlaylist(playlistId);
-        actions.addPlaylist(playlistDetails);
+        actions.setPlaylist(playlistDetails);
       } catch (error: unknown) {
         const errorMessage =
           error instanceof Error ? error.message : 'Something went wrong';
@@ -39,6 +44,8 @@ const playlistModel: PlaylistModel = persist(
 
     // Selector to get playlist by playlistId
     getPlaylistById: thunk((actions, playlistId, helpers) => {
+      if (!playlistId) return undefined;
+
       const playlist = helpers.getState().data[playlistId];
       if (playlist) return playlist;
 
@@ -47,26 +54,13 @@ const playlistModel: PlaylistModel = persist(
         console.log('Playlist not found in state, fetching from API');
       }
 
-      return actions.getPlaylist(playlistId);
+      actions.getPlaylist(playlistId);
+      return undefined;
     }),
 
     // Action to remove playlist from state
     removePlaylist: action((state, playlistId) => {
       delete state.data[playlistId];
-    }),
-
-    deletePlaylist: thunk(async (actions, playlistId) => {
-      try {
-        // Remove playlist from state
-        actions.removePlaylist(playlistId);
-
-        // TODO: Remove notes and video progress for this playlist
-        // Will need to implement cross-model communication properly
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Error deleting playlist';
-        console.error('Error deleting playlist:', errorMessage);
-      }
     }),
   },
   { storage: 'localStorage', allow: ['data'] }

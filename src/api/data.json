@@ -1,0 +1,61 @@
+{
+  "kind": "youtube#playlistItemListResponse",
+  "etag": "C-B-ABAKH6GNHRiePsNGMv3OdFQ",
+  "items": [
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "riwdB0RajRnxcrWV8fJ8BSzkGQc",
+      "id": "UEw1M1AyOWJQTUJpMVFHbkU4Vi0tenAxSGE4OXJFUmdsZy41NkI0NEY2RDEwNTU3Q0M2",
+      "snippet": {
+        "publishedAt": "2024-02-07T01:32:50Z",
+        "channelId": "UCVFfowkXM8rDhjbIgHzT9Kw",
+        "title": "Create a C# Application from Start to Finish - Complete Course",
+        "description": "In this comprehensive 24-hour-long course, you will learn to use C# to build a complete application from start to finish.  Using .net and Visual Studio, we will construct a crimba.com/freecodecamp",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.c@/wfWxdh-_k_4/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.c@/wfWxdh-_k_4/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.c@/wfWxdh-_k_4/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.c@/wfWxdh-_k_4/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.c@/wfWxdh-_k_4/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "CodeBit Labs",
+        "playlistId": "PL53P29bPMBi1QGnE8V--zp1Ha89rERglg",
+        "position": 0,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "wfWxdh-_k_4"
+        },
+        "videoOwnerChannelTitle": "freeCodeCamp.org",
+        "videoOwnerChannelId": "UC8butISFwT-Wl7EV0hUK0BQ"
+      },
+      "contentDetails": {
+        "videoId": "wfWxdh-_k_4",
+        "videoPublishedAt": "2019-03-25T12:45:35Z"
+      }
+    }
+  ],
+  "pageInfo": {
+    "totalResults": 3,
+    "resultsPerPage": 50
+  }
+}

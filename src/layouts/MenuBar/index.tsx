@@ -1,9 +1,9 @@
+import logo from '@/assets/images/logo.png';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import HomeIcon from '@mui/icons-material/Home';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import WatchLaterIcon from '@mui/icons-material/WatchLater';
 import { Link, useMatch } from 'react-router-dom';
-import logo from '../../assets/images/logo.png';
 
 interface MenuBarProps {
   menuBarTrig?: boolean;

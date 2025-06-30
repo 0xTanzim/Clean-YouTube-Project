@@ -6,6 +6,7 @@ import BookmarkDemo from '../pages/BookmarkDemo';
 import NotFound from '../pages/Error404';
 import HomePage from '../pages/HomePage';
 import PlayerPage from '../pages/PlayerPage';
+import SpeedControlDemo from '../pages/SpeedControlDemo';
 
 const Routers = () => {
   return (
@@ -18,6 +19,7 @@ const Routers = () => {
         <Route path="/favorites" element={<FavoritePlaylists />} />
         <Route path="/player/:playlistId" element={<PlayerPage />} />
         <Route path="/bookmark-demo" element={<BookmarkDemo />} />
+        <Route path="/speed-demo" element={<SpeedControlDemo />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

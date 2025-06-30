@@ -1,11 +1,15 @@
 // PlayerPage.tsx - Clean, Distraction-Free Study Experience
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import YouTube from 'react-youtube';
 import BookmarkForm from '../components/bookmarks/BookmarkForm';
 import BookmarkManager from '../components/bookmarks/BookmarkManager';
-import VideoBookmarkTimeline from '../components/bookmarks/VideoBookmarkTimeline';
+import {
+  PlaylistSidebar,
+  VideoInfoBar,
+  VideoPlayer,
+} from '../components/player-controls';
 import { useBookmarks } from '../hooks/useBookmarks';
+import { usePlaybackSpeed } from '../hooks/usePlaybackSpeed';
 import { useStoreActions } from '../hooks/useStore';
 import type { VideoProgress } from '../types';
 
@@ -31,6 +35,10 @@ const PlayerPage = () => {
   // Initialize bookmarks hook
   const { videoBookmarks, playlistBookmarks, exportAsMarkdown, stats } =
     useBookmarks(selectedVideo || undefined, playlistId);
+
+  // Initialize playback speed hook
+  const { currentSpeed, changeSpeed, increaseSpeed, decreaseSpeed } =
+    usePlaybackSpeed(playlistId);
 
   // Load progress from localStorage
   const loadProgress = useCallback(() => {
@@ -183,6 +191,10 @@ const PlayerPage = () => {
   const onYouTubeReady = (event: any) => {
     youtubePlayerRef.current = event.target;
     setVideoDuration(event.target.getDuration());
+    // Apply saved playback speed
+    if (currentSpeed !== 1) {
+      event.target.setPlaybackRate(currentSpeed);
+    }
   };
 
   const onYouTubeStateChange = (event: any) => {
@@ -206,6 +218,14 @@ const PlayerPage = () => {
           clearInterval(interval);
         }
       }, 1000);
+    }
+  };
+
+  // Handle speed change
+  const handleSpeedChange = (speed: number) => {
+    changeSpeed(speed);
+    if (youtubePlayerRef.current) {
+      youtubePlayerRef.current.setPlaybackRate(speed);
     }
   };
 
@@ -269,6 +289,28 @@ const PlayerPage = () => {
             handleExportBookmarks();
           }
           break;
+        case '<':
+          if (event.shiftKey) {
+            event.preventDefault();
+            decreaseSpeed();
+            // Apply the new speed to the player if available
+            if (youtubePlayerRef.current) {
+              const newSpeed = currentSpeed;
+              youtubePlayerRef.current.setPlaybackRate(newSpeed);
+            }
+          }
+          break;
+        case '>':
+          if (event.shiftKey) {
+            event.preventDefault();
+            increaseSpeed();
+            // Apply the new speed to the player if available
+            if (youtubePlayerRef.current) {
+              const newSpeed = currentSpeed;
+              youtubePlayerRef.current.setPlaybackRate(newSpeed);
+            }
+          }
+          break;
         case 'Escape':
           event.preventDefault();
           setShowPlaylist(false);
@@ -280,7 +322,19 @@ const PlayerPage = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentVideoIndex, showPlaylist]);
+  }, [
+    currentVideoIndex,
+    showPlaylist,
+    showBookmarkManager,
+    showBookmarkForm,
+    currentSpeed,
+    increaseSpeed,
+    decreaseSpeed,
+    goToPreviousVideo,
+    goToNextVideo,
+    handleCreateBookmark,
+    handleExportBookmarks,
+  ]);
 
   const getCurrentVideo = () => {
     if (!playlistData?.playlistItems || !selectedVideo) return null;
@@ -327,340 +381,54 @@ const PlayerPage = () => {
     <div className="min-h-screen bg-black">
       {/* Full-screen video player container */}
       <div className="relative">
-        {/* Video Player - Maximum size for study focus */}
-        <div className="w-full bg-black flex justify-center">
-          <div className="w-full max-w-none">
-            <YouTube
-              videoId={selectedVideo || undefined}
-              opts={{
-                width: '100%',
-                height:
-                  typeof window !== 'undefined'
-                    ? window.innerWidth > 1280
-                      ? '900'
-                      : window.innerWidth > 768
-                      ? '720'
-                      : '400'
-                    : '900',
-                playerVars: {
-                  autoplay: 1,
-                  controls: 1,
-                  rel: 0,
-                  showinfo: 0,
-                  modestbranding: 1,
-                  fs: 1,
-                  iv_load_policy: 3,
-                  disablekb: 0,
-                  cc_load_policy: 1, // Enable captions for better learning
-                  start: 0,
-                },
-              }}
-              onReady={onYouTubeReady}
-              onStateChange={onYouTubeStateChange}
-              className="w-full"
-              onEnd={goToNextVideo}
-            />
-          </div>
-        </div>
-
-        {/* Minimal Video Info Bar */}
-        <div className="bg-gray-900 text-white p-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex-1 min-w-0">
-                <h1 className="text-lg font-semibold truncate">
-                  {currentVideo?.title || 'Loading...'}
-                </h1>
-                <div className="flex items-center space-x-4 mt-1">
-                  <p className="text-sm text-gray-400">
-                    {currentVideo?.channelTitle} • Video {currentVideoIndex + 1}{' '}
-                    of {playlistData?.playlistItems?.length || 0}
-                  </p>
-                  <div className="text-xs text-blue-400">
-                    {getProgressPercentage()}% Complete •{' '}
-                    {formatWatchTime(watchTime)} watched
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Shortcuts: ← Previous | → Next | P Playlist | B Bookmark | M
-                  Manager | Ctrl+E Export | Esc Close
-                </p>
-              </div>
-
-              {/* Navigation Controls */}
-              <div className="flex items-center space-x-4 ml-4">
-                {/* Bookmark Controls */}
-                <div className="flex items-center space-x-2 border-r border-gray-700 pr-4">
-                  <button
-                    onClick={handleCreateBookmark}
-                    disabled={!selectedVideo}
-                    className="p-2 rounded-lg bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    title="Add Bookmark (B)"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                      />
-                    </svg>
-                  </button>
-
-                  <button
-                    onClick={() => setShowBookmarkManager(!showBookmarkManager)}
-                    className={`p-2 rounded-lg transition-colors relative ${
-                      showBookmarkManager
-                        ? 'bg-yellow-600 hover:bg-yellow-700'
-                        : 'bg-gray-800 hover:bg-gray-700'
-                    }`}
-                    title="Bookmark Manager (M)"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                      />
-                    </svg>
-                    {videoBookmarks.length > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {videoBookmarks.length}
-                      </span>
-                    )}
-                  </button>
-
-                  {playlistBookmarks.length > 0 && (
-                    <button
-                      onClick={handleExportBookmarks}
-                      className="p-2 rounded-lg bg-green-600 hover:bg-green-700 transition-colors"
-                      title="Export Bookmarks (Ctrl+E)"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                <button
-                  onClick={goToPreviousVideo}
-                  disabled={currentVideoIndex === 0}
-                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  title="Previous Video"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
-
-                <button
-                  onClick={goToNextVideo}
-                  disabled={
-                    !playlistData?.playlistItems ||
-                    currentVideoIndex >= playlistData.playlistItems.length - 1
-                  }
-                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  title="Next Video"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
-
-                <button
-                  onClick={() => setShowPlaylist(!showPlaylist)}
-                  className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors"
-                  title="Toggle Playlist"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Video Bookmark Timeline */}
-              {videoBookmarks.length > 0 && videoDuration > 0 && (
-                <div className="mt-4">
-                  <VideoBookmarkTimeline
-                    bookmarks={videoBookmarks}
-                    videoDuration={videoDuration}
-                    currentTime={currentVideoTime}
-                    onJumpToTime={handleJumpToTime}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Collapsible Playlist Sidebar */}
-      <div
-        className={`fixed top-0 right-0 h-full bg-gray-900 border-l border-gray-700 transition-transform duration-300 z-50 ${
-          showPlaylist
-            ? 'transform translate-x-0'
-            : 'transform translate-x-full'
-        }`}
-        style={{ width: '400px' }}
-      >
-        <div className="p-4 border-b border-gray-700">
-          <div className="flex items-center justify-between">
-            <h2 className="text-white font-semibold">Playlist</h2>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={resetProgress}
-                className="p-1 rounded text-red-400 hover:text-red-300 text-xs"
-                title="Reset Progress"
-              >
-                Reset
-              </button>
-              <button
-                onClick={() => setShowPlaylist(false)}
-                className="p-1 rounded text-gray-400 hover:text-white"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 mt-1">
-            {playlistData?.playlistTitle}
-          </p>
-          <div className="mt-2">
-            <div className="bg-gray-800 rounded-full h-2">
-              <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${getProgressPercentage()}%` }}
-              />
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              {getProgressPercentage()}% Complete • {formatWatchTime(watchTime)}{' '}
-              total
-            </p>
-          </div>
-        </div>
-
-        <div className="h-full overflow-y-auto pb-20">
-          {playlistData?.playlistItems?.map((item: any, index: number) => (
-            <div
-              key={item.id}
-              onClick={() =>
-                handleVideoClick(item.contentDetails.videoId, index)
-              }
-              className={`flex items-start space-x-3 p-3 cursor-pointer transition-colors border-b border-gray-800 hover:bg-gray-800 ${
-                selectedVideo === item.contentDetails.videoId
-                  ? 'bg-blue-900/30 border-blue-600'
-                  : ''
-              } ${index <= currentVideoIndex ? 'opacity-100' : 'opacity-70'}`}
-            >
-              <div className="relative flex-shrink-0">
-                <img
-                  src={item.thumbnail.url}
-                  alt={item.title}
-                  className="w-16 h-12 object-cover rounded"
-                />
-                <div className="absolute bottom-1 right-1 bg-black bg-opacity-75 text-white text-xs px-1 rounded">
-                  {index + 1}
-                </div>
-                {index < currentVideoIndex && (
-                  <div className="absolute top-1 left-1 bg-green-600 text-white text-xs px-1 rounded">
-                    ✓
-                  </div>
-                )}
-                {index === currentVideoIndex && (
-                  <div className="absolute top-1 left-1 bg-blue-600 text-white text-xs px-1 rounded">
-                    ▶
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4
-                  className={`text-sm font-medium line-clamp-2 leading-tight ${
-                    selectedVideo === item.contentDetails.videoId
-                      ? 'text-blue-400'
-                      : 'text-white'
-                  }`}
-                >
-                  {item.title}
-                </h4>
-                <p className="text-xs text-gray-400 mt-1">
-                  {item.channelTitle}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Overlay when playlist is open on mobile */}
-      {showPlaylist && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setShowPlaylist(false)}
+        {/* Video Player */}
+        <VideoPlayer
+          videoId={selectedVideo}
+          onReady={onYouTubeReady}
+          onStateChange={onYouTubeStateChange}
+          onEnd={goToNextVideo}
         />
-      )}
+
+        {/* Video Info Bar */}
+        <VideoInfoBar
+          currentVideo={currentVideo}
+          currentVideoIndex={currentVideoIndex}
+          totalVideos={playlistData?.playlistItems?.length || 0}
+          progressPercentage={getProgressPercentage()}
+          watchTime={watchTime}
+          currentSpeed={currentSpeed}
+          videoBookmarks={videoBookmarks}
+          videoDuration={videoDuration}
+          currentVideoTime={currentVideoTime}
+          onCreateBookmark={handleCreateBookmark}
+          onToggleBookmarkManager={() =>
+            setShowBookmarkManager(!showBookmarkManager)
+          }
+          onExportBookmarks={handleExportBookmarks}
+          onPreviousVideo={goToPreviousVideo}
+          onNextVideo={goToNextVideo}
+          onTogglePlaylist={() => setShowPlaylist(!showPlaylist)}
+          onSpeedChange={handleSpeedChange}
+          onJumpToTime={handleJumpToTime}
+          showBookmarkManager={showBookmarkManager}
+          hasPlaylistBookmarks={playlistBookmarks.length > 0}
+          formatWatchTime={formatWatchTime}
+        />
+      </div>
+
+      {/* Playlist Sidebar */}
+      <PlaylistSidebar
+        showPlaylist={showPlaylist}
+        playlistData={playlistData}
+        selectedVideo={selectedVideo}
+        currentVideoIndex={currentVideoIndex}
+        progressPercentage={getProgressPercentage()}
+        watchTime={watchTime}
+        onVideoClick={handleVideoClick}
+        onResetProgress={resetProgress}
+        onClose={() => setShowPlaylist(false)}
+        formatWatchTime={formatWatchTime}
+      />
 
       {/* Bookmark Manager Sidebar */}
       {showBookmarkManager && (

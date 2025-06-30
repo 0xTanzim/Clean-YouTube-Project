@@ -32,6 +32,8 @@ const getPlaylistItems = async (
 
     const newResult = [...result, ...data.items];
 
+    console.log('data', data);
+
     if (data.nextPageToken) {
       return await getPlaylistItems(playlistId, data.nextPageToken, newResult);
     }

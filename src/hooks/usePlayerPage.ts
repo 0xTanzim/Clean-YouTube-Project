@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+// Types
+import type { VideoProgress } from '@/types';
+
 // Custom hooks with path aliases
 import { useBookmarks } from '@/hooks/useBookmarks';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
@@ -192,7 +195,7 @@ export const usePlayerPage = () => {
   // Load progress when playlist data is available
   useEffect(() => {
     if (playlistData?.playlistItems) {
-      const savedProgress = loadProgress();
+      const savedProgress: VideoProgress | null = loadProgress();
 
       // If no saved progress, start with first video
       if (!savedProgress) {
@@ -204,10 +207,11 @@ export const usePlayerPage = () => {
           saveProgress(0, firstVideoId, 0, playlistData.playlistItems.length);
         }
       } else {
-        // Restore from saved progress
+        // Restore from saved progress (savedProgress is not null here)
+        const progress = savedProgress as VideoProgress;
+        const videoIndex = progress.currentVideoIndex || 0;
         const videoId =
-          playlistData.playlistItems[savedProgress.currentVideoIndex]
-            ?.contentDetails.videoId;
+          playlistData.playlistItems[videoIndex]?.contentDetails.videoId;
         if (videoId) {
           setSelectedVideo(videoId);
         }

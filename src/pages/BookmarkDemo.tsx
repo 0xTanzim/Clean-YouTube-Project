@@ -1,4 +1,4 @@
-import BookmarkManager from '@/components/bookmarks/BookmarkManager';
+import { BookmarkManager } from '@/components/bookmarks/manager';
 import VideoBookmarkTimeline from '@/components/bookmarks/VideoBookmarkTimeline';
 import { bookmarkUtils } from '@/lib/utils';
 import type { VideoBookmark } from '@/types';
@@ -196,6 +196,7 @@ const BookmarkDemo: React.FC = () => {
                 bookmarks={demoBookmarks}
                 onJumpToTime={handleJumpToTime}
                 onExportMarkdown={handleExportMarkdown}
+                onClose={() => {}} // Demo page - no close needed
               />
             </div>
           )}

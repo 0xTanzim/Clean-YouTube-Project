@@ -1,10 +1,7 @@
 import BookmarkForm from '@/components/bookmarks/BookmarkForm';
-import BookmarkManager from '@/components/bookmarks/BookmarkManager';
-import {
-  PlaylistSidebar,
-  VideoInfoBar,
-  VideoPlayer,
-} from '@/components/player-controls';
+import { BookmarkManager } from '@/components/bookmarks/manager';
+import { PlaylistSidebar, VideoPlayer } from '@/components/player-controls';
+import { VideoInfoBar } from '@/components/video-info';
 import { usePlayerContext } from '@/contexts/PlayerContext';
 import type { ReactNode } from 'react';
 
@@ -14,7 +11,7 @@ interface PlayerLayoutProps {
 }
 
 const PlayerLayout = ({ children }: PlayerLayoutProps) => (
-  <div className="min-h-screen bg-black">{children}</div>
+  <div className="h-screen w-full bg-black overflow-hidden">{children}</div>
 );
 
 // Video Section Component
@@ -49,38 +46,45 @@ const VideoSection = () => {
   const currentVideo = getCurrentVideo();
 
   return (
-    <div className="relative">
-      <VideoPlayer
-        videoId={selectedVideo}
-        onReady={handleYouTubeReady}
-        onStateChange={onYouTubeStateChange}
-        onEnd={goToNextVideo}
-      />
+    <div className="relative h-full w-full">
+      {/* Video Player - Full Screen */}
+      <div className="absolute inset-0">
+        <VideoPlayer
+          videoId={selectedVideo}
+          onReady={handleYouTubeReady}
+          onStateChange={onYouTubeStateChange}
+          onEnd={goToNextVideo}
+          className="h-full w-full"
+        />
+      </div>
 
-      <VideoInfoBar
-        currentVideo={currentVideo}
-        currentVideoIndex={currentVideoIndex}
-        totalVideos={playlistData?.playlistItems?.length || 0}
-        progressPercentage={getProgressPercentage()}
-        watchTime={watchTime}
-        currentSpeed={currentSpeed}
-        videoBookmarks={videoBookmarks}
-        videoDuration={videoDuration}
-        currentVideoTime={currentVideoTime}
-        onCreateBookmark={handleCreateBookmark}
-        onToggleBookmarkManager={() =>
-          setShowBookmarkManager(!showBookmarkManager)
-        }
-        onExportBookmarks={handleExportBookmarks}
-        onPreviousVideo={goToPreviousVideo}
-        onNextVideo={goToNextVideo}
-        onTogglePlaylist={() => setShowPlaylist(!showPlaylist)}
-        onSpeedChange={handleSpeedChange}
-        onJumpToTime={handleJumpToTime}
-        showBookmarkManager={showBookmarkManager}
-        hasPlaylistBookmarks={playlistBookmarks.length > 0}
-        formatWatchTime={formatWatchTime}
-      />
+      {/* Video Info Overlay - Bottom */}
+      <div className="absolute inset-x-0 bottom-0 z-20">
+        <VideoInfoBar
+          currentVideo={currentVideo}
+          currentVideoIndex={currentVideoIndex}
+          totalVideos={playlistData?.playlistItems?.length || 0}
+          progressPercentage={getProgressPercentage()}
+          watchTime={watchTime}
+          currentSpeed={currentSpeed}
+          videoBookmarks={videoBookmarks}
+          videoDuration={videoDuration}
+          currentVideoTime={currentVideoTime}
+          onCreateBookmark={handleCreateBookmark}
+          onToggleBookmarkManager={() =>
+            setShowBookmarkManager(!showBookmarkManager)
+          }
+          onExportBookmarks={handleExportBookmarks}
+          onPreviousVideo={goToPreviousVideo}
+          onNextVideo={goToNextVideo}
+          onTogglePlaylist={() => setShowPlaylist(!showPlaylist)}
+          onSpeedChange={handleSpeedChange}
+          onJumpToTime={handleJumpToTime}
+          showBookmarkManager={showBookmarkManager}
+          hasPlaylistBookmarks={playlistBookmarks.length > 0}
+          formatWatchTime={formatWatchTime}
+        />
+      </div>
     </div>
   );
 };
@@ -173,6 +177,7 @@ const BookmarkSection = () => {
                   bookmarks={videoBookmarks}
                   onJumpToTime={handleJumpToTime}
                   onExportMarkdown={handleExportBookmarks}
+                  onClose={() => setShowBookmarkManager(false)}
                   className="h-full p-4"
                 />
               </div>

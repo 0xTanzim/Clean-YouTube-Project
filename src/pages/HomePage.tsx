@@ -1,4 +1,4 @@
-import PlayListCard from '@/components/playlist-card-itms';
+import PlayListCard from '@/components/playlist-cards';
 import {
   EmptyState,
   ErrorMessage,

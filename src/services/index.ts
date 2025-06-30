@@ -1,9 +1,16 @@
-// Service layer pattern for API calls
+// YouTube Services
+export { PlaylistService } from './youtube/PlaylistService';
+
+// Storage Services
+export { BookmarkService } from './storage/BookmarkService';
+export { ProgressService } from './storage/ProgressService';
+
+// Legacy service - keeping for backward compatibility
 import getPlaylist from '@/api';
-import { safeAsync } from '@/lib/utils';
+import { safeAsync } from '@/lib/helpers/async';
 import type { ApiResponse, Playlist } from '@/types';
 
-export class PlaylistService {
+export class PlaylistService_Legacy {
   /**
    * Fetches a playlist with error handling
    */
@@ -20,10 +27,11 @@ export class PlaylistService {
             'Failed to fetch playlist. Please check your connection and try again.',
           status: 500,
         },
+        success: false,
       };
     }
 
-    return { data: data! };
+    return { data: data!, success: true };
   }
 
   /**

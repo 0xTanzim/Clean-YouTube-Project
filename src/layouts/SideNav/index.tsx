@@ -7,7 +7,7 @@ import ReorderIcon from '@mui/icons-material/Reorder';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import { useState } from 'react';
 
-import PlayListForm from '@/components/playlist form';
+import PlayListForm from '@/components/playlist-form';
 
 import { useStoreActions } from '@/hooks/useStore';
 

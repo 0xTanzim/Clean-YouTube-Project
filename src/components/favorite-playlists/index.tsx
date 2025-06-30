@@ -2,7 +2,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { usePlaylists } from '@/hooks/usePlaylists';
 import type { Playlist } from '@/types';
 import { useEffect, useState } from 'react';
-import PlayListCard from '../playlist-card-itms';
+import PlayListCard from '../playlist-cards';
 import { EmptyState, LoadingSpinner } from '../ui/Feedback';
 
 const FavoritePlaylists = () => {

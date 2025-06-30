@@ -2,7 +2,7 @@ import { usePlaylists } from '@/hooks/usePlaylists';
 import type { Playlist } from '@/types';
 import { useStoreState } from 'easy-peasy';
 import { useEffect, useState } from 'react';
-import PlayListCard from '../playlist-card-itms';
+import PlayListCard from '../playlist-cards';
 import { EmptyState, LoadingSpinner } from '../ui/Feedback';
 
 const RecentPlaylists = () => {

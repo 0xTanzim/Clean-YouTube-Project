@@ -1,5 +1,5 @@
-import { useCallback, useMemo } from 'react';
 import { bookmarkUtils } from '@/lib/utils';
+import { useCallback, useMemo } from 'react';
 import type { VideoBookmark } from '../types';
 import { useStoreActions, useStoreState } from './useStore';
 
@@ -24,7 +24,7 @@ export const useBookmarks = (videoId?: string, playlistId?: string) => {
     (actions) => actions.bookmarks.deleteBookmarksForPlaylist
   );
 
-  const allBookmarks = useStoreState((state) => state.bookmarks.bookmarks);
+  const allBookmarks = useStoreState((state) => state.bookmarks.items);
 
   // Get bookmarks for current video
   const videoBookmarks = useMemo(() => {
@@ -37,12 +37,14 @@ export const useBookmarks = (videoId?: string, playlistId?: string) => {
     if (!playlistId) return [];
 
     const bookmarks: VideoBookmark[] = [];
-    Object.values(allBookmarks).forEach((videoBookmarks) => {
-      const playlistBookmarksForVideo = videoBookmarks.filter(
-        (bookmark) => bookmark.playlistId === playlistId
-      );
-      bookmarks.push(...playlistBookmarksForVideo);
-    });
+    Object.values(allBookmarks as Record<string, VideoBookmark[]>).forEach(
+      (videoBookmarks) => {
+        const playlistBookmarksForVideo = videoBookmarks.filter(
+          (bookmark: VideoBookmark) => bookmark.playlistId === playlistId
+        );
+        bookmarks.push(...playlistBookmarksForVideo);
+      }
+    );
 
     return bookmarks.sort((a, b) => b.createdAt - a.createdAt);
   }, [allBookmarks, playlistId]);
@@ -62,8 +64,8 @@ export const useBookmarks = (videoId?: string, playlistId?: string) => {
         playlistId,
         timestamp,
         title,
-        note,
-        tags,
+        ...(note && { note }),
+        ...(tags && { tags }),
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -117,7 +119,8 @@ export const useBookmarks = (videoId?: string, playlistId?: string) => {
   const findBookmarkAtTime = useCallback(
     (timestamp: number) => {
       return videoBookmarks.find(
-        (bookmark) => Math.abs(bookmark.timestamp - timestamp) < 2
+        (bookmark: VideoBookmark) =>
+          Math.abs(bookmark.timestamp - timestamp) < 2
       );
     },
     [videoBookmarks]
@@ -126,8 +129,12 @@ export const useBookmarks = (videoId?: string, playlistId?: string) => {
   // Get bookmark by ID
   const getBookmarkById = useCallback(
     (bookmarkId: string) => {
-      for (const bookmarks of Object.values(allBookmarks)) {
-        const bookmark = bookmarks.find((b) => b.id === bookmarkId);
+      for (const bookmarks of Object.values(
+        allBookmarks as Record<string, VideoBookmark[]>
+      )) {
+        const bookmark = bookmarks.find(
+          (b: VideoBookmark) => b.id === bookmarkId
+        );
         if (bookmark) return bookmark;
       }
       return null;
@@ -161,8 +168,8 @@ export const useBookmarks = (videoId?: string, playlistId?: string) => {
     const totalPlaylistBookmarks = playlistBookmarks.length;
 
     const tags = new Set<string>();
-    videoBookmarks.forEach((bookmark) => {
-      bookmark.tags?.forEach((tag) => tags.add(tag));
+    videoBookmarks.forEach((bookmark: VideoBookmark) => {
+      bookmark.tags?.forEach((tag: string) => tags.add(tag));
     });
 
     const averageBookmarksPerVideo =

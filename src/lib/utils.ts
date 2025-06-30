@@ -4,7 +4,11 @@ import type { VideoBookmark, VideoProgress } from '@/types';
 /**
  * Truncates text to specified length with ellipsis
  */
-export const truncateText = (text: string, maxLength: number): string => {
+export const truncateText = (
+  text: string | undefined | null,
+  maxLength: number
+): string => {
+  if (!text || typeof text !== 'string') return '';
   if (text.length <= maxLength) return text;
   return `${text.substring(0, maxLength)}...`;
 };

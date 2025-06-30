@@ -1,10 +1,10 @@
-import type { VideoBookmark } from '@/types';
+import type { PlaylistItem, VideoBookmark } from '@/types';
 import React from 'react';
 import VideoBookmarkTimeline from '../bookmarks/VideoBookmarkTimeline';
 import PlaybackSpeedControl from './PlaybackSpeedControl';
 
 interface VideoInfoBarProps {
-  currentVideo: any;
+  currentVideo: PlaylistItem | null;
   currentVideoIndex: number;
   totalVideos: number;
   progressPercentage: number;
@@ -60,12 +60,12 @@ const VideoInfoBar: React.FC<VideoInfoBarProps> = ({
         <div className="flex items-center justify-between mb-3">
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-semibold truncate">
-              {currentVideo?.title || 'Loading...'}
+              {currentVideo?.snippet.title || 'Loading...'}
             </h1>
             <div className="flex items-center space-x-4 mt-1">
               <p className="text-sm text-gray-400">
-                {currentVideo?.channelTitle} • Video {currentVideoIndex + 1} of{' '}
-                {totalVideos}
+                {currentVideo?.snippet.channelTitle} • Video{' '}
+                {currentVideoIndex + 1} of {totalVideos}
               </p>
               <div className="text-xs text-blue-400">
                 {progressPercentage}% Complete • {formatWatchTime(watchTime)}{' '}

@@ -1,25 +1,45 @@
 import { useCallback, useRef, useState } from 'react';
 
+// YouTube Player API types
+interface YouTubePlayer {
+  getCurrentTime(): number;
+  getDuration(): number;
+  seekTo(seconds: number, allowSeekAhead?: boolean): void;
+  playVideo(): void;
+  pauseVideo(): void;
+  setPlaybackRate(suggestedRate: number): void;
+  getPlaybackRate(): number;
+  getPlayerState(): number;
+}
+
+interface YouTubeEvent {
+  target: YouTubePlayer;
+  data: number;
+}
+
 /**
  * Custom hook for YouTube player control and state management
  * Encapsulates all YouTube player interactions
  */
 export const useYouTubePlayer = () => {
-  const youtubePlayerRef = useRef<any>(null);
+  const youtubePlayerRef = useRef<YouTubePlayer | null>(null);
   const [currentVideoTime, setCurrentVideoTime] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
 
-  const onYouTubeReady = useCallback((event: any, currentSpeed?: number) => {
-    youtubePlayerRef.current = event.target;
-    setVideoDuration(event.target.getDuration());
+  const onYouTubeReady = useCallback(
+    (event: YouTubeEvent, currentSpeed?: number) => {
+      youtubePlayerRef.current = event.target;
+      setVideoDuration(event.target.getDuration());
 
-    // Apply saved playback speed
-    if (currentSpeed && currentSpeed !== 1) {
-      event.target.setPlaybackRate(currentSpeed);
-    }
-  }, []);
+      // Apply saved playback speed
+      if (currentSpeed && currentSpeed !== 1) {
+        event.target.setPlaybackRate(currentSpeed);
+      }
+    },
+    []
+  );
 
-  const onYouTubeStateChange = useCallback((event: any) => {
+  const onYouTubeStateChange = useCallback((event: YouTubeEvent) => {
     // Update current time when video is playing
     if (event.data === 1) {
       // Playing state

@@ -241,6 +241,9 @@ export const usePlayerPage = () => {
 
       return () => clearInterval(interval);
     }
+
+    // Return empty cleanup function for other cases
+    return () => {};
   }, [
     selectedVideo,
     currentVideoIndex,

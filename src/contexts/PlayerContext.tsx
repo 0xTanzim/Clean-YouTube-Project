@@ -1,11 +1,12 @@
 import { usePlayerPage } from '@/hooks/usePlayerPage';
+import type { Playlist, PlaylistItem, VideoBookmark } from '@/types';
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 
 // Define the context type
 interface PlayerContextType {
   // Basic state
-  playlistData: any;
+  playlistData: Playlist | null;
   selectedVideo: string | null;
   currentVideoIndex: number;
   watchTime: number;
@@ -26,13 +27,17 @@ interface PlayerContextType {
   // Navigation
   goToNextVideo: () => void;
   goToPreviousVideo: () => void;
-  getCurrentVideo: () => any;
+  getCurrentVideo: () => PlaylistItem | null;
   handleVideoClick: (videoId: string, index: number) => void;
 
   // Bookmarks
-  videoBookmarks: any[];
-  playlistBookmarks: any[];
-  stats: any;
+  videoBookmarks: VideoBookmark[];
+  playlistBookmarks: VideoBookmark[];
+  stats: {
+    totalBookmarks: number;
+    totalPlaylistBookmarks: number;
+    uniqueTags: string[];
+  };
   handleCreateBookmark: () => void;
   handleJumpToTime: (timestamp: number) => void;
   handleExportBookmarks: () => void;

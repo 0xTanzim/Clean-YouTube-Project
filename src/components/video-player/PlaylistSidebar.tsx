@@ -1,3 +1,4 @@
+import type { PlaylistItem } from '@/types';
 import React from 'react';
 
 interface PlaylistSidebarProps {
@@ -6,7 +7,7 @@ interface PlaylistSidebarProps {
 
   // Playlist data
   playlistTitle?: string;
-  playlistItems?: any[];
+  playlistItems?: PlaylistItem[];
 
   // Progress
   progressPercentage: number;
@@ -102,7 +103,7 @@ const PlaylistSidebar: React.FC<PlaylistSidebarProps> = ({
 
         {/* Video list */}
         <div className="h-full overflow-y-auto pb-20">
-          {playlistItems.map((item: any, index: number) => (
+          {playlistItems.map((item: PlaylistItem, index: number) => (
             <div
               key={item.id}
               onClick={() => onVideoSelect(item.contentDetails.videoId, index)}
@@ -114,8 +115,8 @@ const PlaylistSidebar: React.FC<PlaylistSidebarProps> = ({
             >
               <div className="relative flex-shrink-0">
                 <img
-                  src={item.thumbnail.url}
-                  alt={item.title}
+                  src={item.snippet.thumbnails.medium.url}
+                  alt={item.snippet.title}
                   className="w-16 h-12 object-cover rounded"
                 />
                 <div className="absolute bottom-1 right-1 bg-black bg-opacity-75 text-white text-xs px-1 rounded">
@@ -140,10 +141,10 @@ const PlaylistSidebar: React.FC<PlaylistSidebarProps> = ({
                       : 'text-white'
                   }`}
                 >
-                  {item.title}
+                  {item.snippet.title}
                 </h4>
                 <p className="text-xs text-gray-400 mt-1">
-                  {item.channelTitle}
+                  {item.snippet.channelTitle}
                 </p>
               </div>
             </div>

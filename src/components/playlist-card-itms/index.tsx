@@ -1,14 +1,23 @@
-import { PlayArrow, Star, StarBorder } from '@mui/icons-material';
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useRecent } from '@/hooks/useRecent';
 import { truncateText } from '@/lib/utils';
 import type { PlayListCardProps } from '@/types';
+import { PlayArrow, Star, StarBorder } from '@mui/icons-material';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const PlayListCard = ({ playlist }: PlayListCardProps) => {
-  const { playlistThumbnails, playlistTitle, channelTitle, playlistId } =
-    playlist;
+  if (!playlist) {
+    return null; // Don't render if playlist is undefined
+  }
+
+  const { thumbnails, title, channelTitle, id } = playlist;
+
+  // Additional safety checks for required properties
+  if (!id || !title || !thumbnails?.url) {
+    return null;
+  }
+
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addToRecent } = useRecent();
   const [isUpdatingFavorite, setIsUpdatingFavorite] = useState(false);
@@ -18,7 +27,7 @@ const PlayListCard = ({ playlist }: PlayListCardProps) => {
 
     setIsUpdatingFavorite(true);
     try {
-      await toggleFavorite(playlistId);
+      await toggleFavorite(id);
     } catch (error) {
       console.error('Error updating favorite:', error);
     } finally {
@@ -27,18 +36,18 @@ const PlayListCard = ({ playlist }: PlayListCardProps) => {
   };
 
   const handlePlaylistClick = () => {
-    addToRecent(playlistId);
+    addToRecent(id);
   };
 
-  const isPlaylistFavorite = isFavorite(playlistId);
-  const truncatedTitle = truncateText(playlistTitle, 50);
+  const isPlaylistFavorite = isFavorite(id);
+  const truncatedTitle = truncateText(title, 50);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-transform duration-200 hover:scale-105 hover:shadow-xl border border-gray-200 dark:border-gray-700">
       <div className="aspect-video relative overflow-hidden">
         <img
-          src={playlistThumbnails.url}
-          alt={playlistTitle}
+          src={thumbnails.url}
+          alt={title}
           className="w-full h-full object-cover"
           loading="lazy"
         />
@@ -54,10 +63,10 @@ const PlayListCard = ({ playlist }: PlayListCardProps) => {
 
         <div className="flex items-center justify-between">
           <Link
-            to={`/player/${playlistId}`}
+            to={`/player/${id}`}
             onClick={handlePlaylistClick}
             className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 no-underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            aria-label={`Start tutorial for ${playlistTitle}`}
+            aria-label={`Start tutorial for ${title}`}
           >
             <PlayArrow className="text-lg" />
             <span className="text-sm font-medium">START TUTORIAL</span>

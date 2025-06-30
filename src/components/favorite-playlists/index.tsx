@@ -1,9 +1,9 @@
-import { EmptyState, LoadingSpinner } from '../ui/Feedback';
 import { useFavorites } from '@/hooks/useFavorites';
 import { usePlaylists } from '@/hooks/usePlaylists';
 import type { Playlist } from '@/types';
 import { useEffect, useState } from 'react';
 import PlayListCard from '../playlist-card-itms';
+import { EmptyState, LoadingSpinner } from '../ui/Feedback';
 
 const FavoritePlaylists = () => {
   const { favoriteIds } = useFavorites();
@@ -84,7 +84,7 @@ const FavoritePlaylists = () => {
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {favoritePlaylists.map((playlist) => (
-          <div key={playlist.playlistId} className="flex">
+          <div key={playlist.id} className="flex">
             <PlayListCard playlist={playlist} />
           </div>
         ))}

@@ -1,9 +1,9 @@
-import { EmptyState, LoadingSpinner } from '../ui/Feedback';
 import { usePlaylists } from '@/hooks/usePlaylists';
 import type { Playlist } from '@/types';
 import { useStoreState } from 'easy-peasy';
 import { useEffect, useState } from 'react';
 import PlayListCard from '../playlist-card-itms';
+import { EmptyState, LoadingSpinner } from '../ui/Feedback';
 
 const RecentPlaylists = () => {
   const recentPlaylistIds = useStoreState(
@@ -88,7 +88,7 @@ const RecentPlaylists = () => {
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {recentPlaylists.map((playlist) => (
-          <div key={playlist.playlistId} className="flex">
+          <div key={playlist.id} className="flex">
             <PlayListCard playlist={playlist} />
           </div>
         ))}

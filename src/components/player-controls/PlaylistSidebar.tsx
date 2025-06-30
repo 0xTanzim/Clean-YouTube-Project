@@ -1,8 +1,9 @@
+import type { Playlist } from '@/types';
 import React from 'react';
 
 interface PlaylistSidebarProps {
   showPlaylist: boolean;
-  playlistData: any;
+  playlistData: Playlist | null;
   selectedVideo: string | null;
   currentVideoIndex: number;
   progressPercentage: number;
@@ -71,9 +72,7 @@ const PlaylistSidebar: React.FC<PlaylistSidebarProps> = ({
               </button>
             </div>
           </div>
-          <p className="text-sm text-gray-400 mt-1">
-            {playlistData?.playlistTitle}
-          </p>
+          <p className="text-sm text-gray-400 mt-1">{playlistData?.title}</p>
 
           {/* Progress bar */}
           <div className="mt-2">

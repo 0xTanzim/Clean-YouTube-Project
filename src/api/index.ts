@@ -1,6 +1,12 @@
+import { MAX_RESULTS_PER_PAGE, YOUTUBE_API_BASE_URL } from '@/constants';
+import type {
+  Playlist,
+  PlaylistItem,
+  YouTubePlaylistItem,
+  YouTubePlaylistItemListResponse,
+  YouTubePlaylistListResponse,
+} from '@/types';
 import axios from 'axios';
-import { MAX_RESULTS_PER_PAGE, YOUTUBE_API_BASE_URL } from '../constants';
-import type { Playlist, PlaylistItem } from '../types';
 
 const API_KEY = import.meta.env.VITE_YouTube_API_KEY;
 
@@ -18,17 +24,18 @@ const youtubeApi = axios.create({
 const getPlaylistItems = async (
   playlistId: string,
   pageToken = '',
-  result: PlaylistItem[] = []
-): Promise<PlaylistItem[]> => {
+  result: YouTubePlaylistItem[] = []
+): Promise<YouTubePlaylistItem[]> => {
   try {
-    const { data } = await youtubeApi.get('/playlistItems', {
-      params: {
-        part: 'contentDetails,snippet,id',
-        maxResults: MAX_RESULTS_PER_PAGE,
-        playlistId,
-        pageToken,
-      },
-    });
+    const { data }: { data: YouTubePlaylistItemListResponse } =
+      await youtubeApi.get('/playlistItems', {
+        params: {
+          part: 'contentDetails,snippet,id',
+          maxResults: MAX_RESULTS_PER_PAGE,
+          playlistId,
+          pageToken,
+        },
+      });
 
     const newResult = [...result, ...data.items];
 
@@ -50,12 +57,13 @@ const getPlaylistItems = async (
  */
 const getPlaylist = async (playlistId: string): Promise<Playlist> => {
   try {
-    const { data } = await youtubeApi.get('/playlists', {
-      params: {
-        part: 'snippet,id',
-        id: playlistId,
-      },
-    });
+    const { data }: { data: YouTubePlaylistListResponse } =
+      await youtubeApi.get('/playlists', {
+        params: {
+          part: 'snippet,id',
+          id: playlistId,
+        },
+      });
 
     if (!data.items || data.items.length === 0) {
       throw new Error('Playlist not found.');
@@ -63,13 +71,8 @@ const getPlaylist = async (playlistId: string): Promise<Playlist> => {
 
     const playlistItems = await getPlaylistItems(playlistId);
     const firstItem = data.items[0];
-    const {
-      channelId,
-      title: playlistTitle,
-      description: playlistDescription,
-      thumbnails,
-      channelTitle,
-    } = firstItem.snippet;
+    const { channelId, title, description, thumbnails, channelTitle } =
+      firstItem.snippet;
 
     // Transform playlist items to match our interface
     const transformedItems: PlaylistItem[] = playlistItems.map((item) => ({
@@ -79,7 +82,23 @@ const getPlaylist = async (playlistId: string): Promise<Playlist> => {
         description: item.snippet.description,
         channelTitle: item.snippet.channelTitle,
         publishedAt: item.snippet.publishedAt,
-        thumbnails: item.snippet.thumbnails,
+        thumbnails: {
+          default: {
+            url: item.snippet.thumbnails.default.url,
+            width: item.snippet.thumbnails.default.width,
+            height: item.snippet.thumbnails.default.height,
+          },
+          medium: {
+            url: item.snippet.thumbnails.medium.url,
+            width: item.snippet.thumbnails.medium.width,
+            height: item.snippet.thumbnails.medium.height,
+          },
+          high: {
+            url: item.snippet.thumbnails.high.url,
+            width: item.snippet.thumbnails.high.width,
+            height: item.snippet.thumbnails.high.height,
+          },
+        },
       },
       contentDetails: {
         videoId: item.contentDetails.videoId,
@@ -88,12 +107,16 @@ const getPlaylist = async (playlistId: string): Promise<Playlist> => {
     }));
 
     return {
-      playlistId,
-      playlistTitle,
-      playlistDescription,
+      id: playlistId,
+      title: title,
+      description: description,
       channelTitle,
       channelId,
-      playlistThumbnails: thumbnails.medium,
+      thumbnails: {
+        url: thumbnails.medium.url,
+        width: thumbnails.medium.width,
+        height: thumbnails.medium.height,
+      },
       playlistItems: transformedItems,
       itemCount: transformedItems.length,
     };

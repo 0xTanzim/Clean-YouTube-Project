@@ -211,7 +211,7 @@ const BookmarkSection = () => {
           videoId={selectedVideo}
           playlistId={playlistData?.id || ''}
           currentTime={currentVideoTime}
-          videoTitle={currentVideo.title}
+          videoTitle={currentVideo?.snippet.title || 'Unknown Video'}
           onSave={handleSaveBookmark}
           onCancel={handleCancelBookmark}
         />

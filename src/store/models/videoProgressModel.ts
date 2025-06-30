@@ -1,16 +1,29 @@
-import { action, persist } from 'easy-peasy';
+import { action, persist, thunk } from 'easy-peasy';
+import type { VideoProgressModel } from '../types';
 
-const videoProgressModel = persist(
+const videoProgressModel: VideoProgressModel = persist(
   {
-    progress: {},
+    items: {},
 
-    updateProgress: action((state, { videoId, progress }) => {
-      state.progress[videoId] = progress;
+    updateProgress: action((state, { playlistId, progress }) => {
+      state.items[playlistId] = progress;
+    }),
+
+    removeProgress: action((state, playlistId) => {
+      delete state.items[playlistId];
+    }),
+
+    getProgress: thunk((_, playlistId, helpers) => {
+      return helpers.getState().items[playlistId] || null;
+    }),
+
+    deleteVideoProgressForPlaylist: action((state, playlistId) => {
+      delete state.items[playlistId];
     }),
   },
   {
     storage: 'localStorage',
-    allow: ['progress'],
+    allow: ['items'],
   }
 );
 

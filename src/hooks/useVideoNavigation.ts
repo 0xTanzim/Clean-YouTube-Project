@@ -1,8 +1,9 @@
+import type { Playlist, PlaylistItem } from '@/types';
 import { useCallback } from 'react';
 
 interface UseVideoNavigationProps {
   currentVideoIndex: number;
-  playlistData?: any;
+  playlistData?: Playlist | null;
   onVideoClick: (videoId: string, index: number) => void;
 }
 
@@ -27,7 +28,7 @@ export const useVideoNavigation = ({
   }, [currentVideoIndex, playlistData, onVideoClick]);
 
   const goToPreviousVideo = useCallback(() => {
-    if (currentVideoIndex > 0) {
+    if (currentVideoIndex > 0 && playlistData?.playlistItems) {
       const prevIndex = currentVideoIndex - 1;
       const prevVideo = playlistData.playlistItems[prevIndex];
       onVideoClick(prevVideo.contentDetails.videoId, prevIndex);
@@ -45,7 +46,7 @@ export const useVideoNavigation = ({
     return currentVideoIndex > 0;
   }, [currentVideoIndex]);
 
-  const getCurrentVideo = useCallback(() => {
+  const getCurrentVideo = useCallback((): PlaylistItem | null => {
     if (!playlistData?.playlistItems) return null;
     return playlistData.playlistItems[currentVideoIndex];
   }, [playlistData, currentVideoIndex]);

@@ -1,23 +1,95 @@
-// Core playlist types
+// YouTube API Response Types - Based on actual API structure
+export interface YouTubeThumbnail {
+  url: string;
+  width: number;
+  height: number;
+}
+
+export interface YouTubeThumbnails {
+  default: YouTubeThumbnail;
+  medium: YouTubeThumbnail;
+  high: YouTubeThumbnail;
+  standard?: YouTubeThumbnail;
+  maxres?: YouTubeThumbnail;
+}
+
+// Raw YouTube API PlaylistItem structure
+export interface YouTubePlaylistItemSnippet {
+  publishedAt: string;
+  channelId: string;
+  title: string;
+  description: string;
+  thumbnails: YouTubeThumbnails;
+  channelTitle: string;
+  playlistId: string;
+  position: number;
+  resourceId: {
+    kind: string;
+    videoId: string;
+  };
+  videoOwnerChannelTitle: string;
+  videoOwnerChannelId: string;
+}
+
+export interface YouTubePlaylistItemContentDetails {
+  videoId: string;
+  videoPublishedAt: string;
+}
+
+export interface YouTubePlaylistItem {
+  kind: string;
+  etag: string;
+  id: string;
+  snippet: YouTubePlaylistItemSnippet;
+  contentDetails: YouTubePlaylistItemContentDetails;
+}
+
+export interface YouTubePageInfo {
+  totalResults: number;
+  resultsPerPage: number;
+}
+
+export interface YouTubePlaylistItemListResponse {
+  kind: string;
+  etag: string;
+  nextPageToken?: string;
+  prevPageToken?: string;
+  pageInfo: YouTubePageInfo;
+  items: YouTubePlaylistItem[];
+}
+
+// Raw YouTube API Playlist structure
+export interface YouTubePlaylistSnippet {
+  publishedAt: string;
+  channelId: string;
+  title: string;
+  description: string;
+  thumbnails: YouTubeThumbnails;
+  channelTitle: string;
+  defaultLanguage?: string;
+}
+
+export interface YouTubePlaylist {
+  kind: string;
+  etag: string;
+  id: string;
+  snippet: YouTubePlaylistSnippet;
+}
+
+export interface YouTubePlaylistListResponse {
+  kind: string;
+  etag: string;
+  nextPageToken?: string;
+  prevPageToken?: string;
+  pageInfo: YouTubePageInfo;
+  items: YouTubePlaylist[];
+}
+
+// Application-specific types (normalized from YouTube API)
 export interface PlaylistThumbnail {
   url: string;
   width?: number;
   height?: number;
-}
-
-export interface PlaylistSnippet {
-  title: string;
-  description: string;
-  channelTitle: string;
-  channelId: string;
-  publishedAt: string;
-  thumbnails: {
-    default: PlaylistThumbnail;
-    medium: PlaylistThumbnail;
-    high: PlaylistThumbnail;
-    standard?: PlaylistThumbnail;
-    maxres?: PlaylistThumbnail;
-  };
 }
 
 export interface PlaylistItem {
@@ -40,12 +112,12 @@ export interface PlaylistItem {
 }
 
 export interface Playlist {
-  playlistId: string;
-  playlistTitle: string;
-  playlistDescription: string;
+  id: string; // Changed from playlistId to id for consistency
+  title: string; // Changed from playlistTitle
+  description: string; // Changed from playlistDescription
   channelTitle: string;
   channelId: string;
-  playlistThumbnails: PlaylistThumbnail;
+  thumbnails: PlaylistThumbnail; // Changed from playlistThumbnails
   playlistItems: PlaylistItem[];
   itemCount: number;
 }
